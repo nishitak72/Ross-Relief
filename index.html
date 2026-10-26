@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Ross Relief</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one phone-width column, station shelf up top, sticky tab bar at the bottom, sheets slide up for checkout */
+:root{
+  --navy:#0d2a4f; --maize:#ffcb05; --bg:#eef2f7; --card:#ffffff; --shelf:#dfe8f3;
+  --ink:#0d2a4f; --muted:#5a6d86; --line:#cfd9e6; --ok:#1f8a5b; --warn:#c2410c;
+  --coral:#f06f52; --teal:#14b0a5; --purple:#a35bd6;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Figtree",ui-sans-serif,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#08172c; --card:#112a4c; --shelf:#0d223f; --ink:#e8eef8; --muted:#9fb1c9; --line:#22406a; --ok:#4cc68f; --warn:#fb923c; color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#08172c; --card:#112a4c; --shelf:#0d223f; --ink:#e8eef8; --muted:#9fb1c9; --line:#22406a; --ok:#4cc68f; --warn:#fb923c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.app{max-width:440px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
+header.top{background:var(--navy);color:#fff;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:18px max(16px,env(safe-area-inset-left,0px)) 20px;border-radius:0 0 22px 22px}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sign{background:var(--maize);color:var(--navy);font-family:var(--display);font-weight:800;letter-spacing:.04em;padding:6px 12px;border-radius:6px;font-size:15px}
+.sample{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#b8c8de}
+h1{font-family:var(--display);font-weight:800;font-size:28px;margin:16px 0 4px;text-wrap:balance}
+.station-pick{display:flex;align-items:center;gap:8px;color:#d6e2f2;font-size:14px}
+select{font:inherit;background:#17396a;color:#fff;border:1px solid #2c5490;border-radius:8px;padding:6px 8px}
+select:focus-visible,button:focus-visible{outline:3px solid var(--maize);outline-offset:2px}
+.status{display:flex;gap:8px;margin:16px 0 8px;flex-wrap:wrap}
+.chip{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
+.chip b{color:var(--ink)}
+h2{font-family:var(--display);font-weight:700;font-size:18px;margin:20px 0 10px}
+.shelf{background:var(--shelf);border-radius:14px;padding:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:left;font:inherit;color:inherit;cursor:pointer;display:grid;gap:8px;min-width:0}
+.item:hover{border-color:var(--maize)}
+.item[disabled]{opacity:.5;cursor:not-allowed}
+.item .name{font-weight:700}
+.item .avail{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.shape{width:44px;height:36px;display:block}
+.circle{width:36px;border-radius:50%;background:var(--coral)}
+.square{width:32px;height:32px;border-radius:5px;background:var(--teal)}
+.oval{width:52px;height:28px;border-radius:50%;background:var(--purple)}
+.ring{width:34px;height:34px;border-radius:50%;border:5px solid var(--maize)}
+.blob{width:44px;height:30px;border-radius:40% 60% 55% 45%;background:var(--teal)}
+.squarec{width:30px;height:30px;border-radius:4px;background:var(--coral)}
+.wave{width:52px;height:24px}
+.list{display:grid;gap:10px}
+.loan{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:52px 1fr auto;justify-items:start;gap:12px;align-items:center}
+.loan>.shape{justify-self:center}.loan .meta{font-size:13px;color:var(--muted);min-width:0}
+.loan .due{font-weight:600;font-variant-numeric:tabular-nums}
+.loan .due.late{color:var(--warn)}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:20px;text-align:center;color:var(--muted)}
+.btn{font:inherit;font-weight:700;border:0;border-radius:99px;padding:12px 18px;cursor:pointer}
+.btn.primary{background:var(--maize);color:var(--navy);width:100%;font-size:16px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 14px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;gap:8px;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:5}
+nav.tabs button{flex:1;max-width:200px;font:inherit;font-weight:600;background:none;border:0;color:var(--muted);padding:10px;border-radius:10px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--navy);color:#fff}
+.badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--maize);color:var(--navy);font-size:12px;margin-left:4px}
+.scrim{position:fixed;inset:0;background:rgba(5,15,30,.55);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--card);width:100%;max-width:440px;border-radius:22px 22px 0 0;padding:22px max(18px,env(safe-area-inset-left,0px)) calc(22px + env(safe-area-inset-bottom,0px));display:grid;gap:14px;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.6}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.sheet h3{font-family:var(--display);font-size:22px;margin:0}
+.row{display:flex;gap:12px;align-items:center}
+.pickrow{display:grid;gap:8px}
+.opt{font:inherit;text-align:left;background:var(--bg);border:2px solid transparent;border-radius:10px;padding:10px 12px;color:inherit;cursor:pointer}
+.opt[aria-pressed="true"]{border-color:var(--maize)}
+.fine{font-size:13px;color:var(--muted)}
+.check{width:56px;height:56px;border-radius:50%;background:var(--maize);color:var(--navy);display:grid;place-items:center;font-size:30px;font-weight:800}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--navy);color:#fff;padding:10px 16px;border-radius:99px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
+</style>
+
+</head><body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="sign">SQUISH @ ROSS</span><span class="sample">Sample data</span></div>
+    <h1 id="greet">Grab something to fidget with</h1>
+    <div class="station-pick"><label for="station">You're at</label><select id="station"></select></div>
+  </header>
+
+  <section id="v-shelf">
+    <div class="status" id="status"></div>
+    <h2>On the shelf</h2>
+    <div class="shelf" id="shelf"></div>
+    <p class="fine">Borrow up to 2 items at a time. Keep them for 24 hours and return to any Ross Relief station.</p>
+  </section>
+
+  <section id="v-mine" hidden>
+    <h2>Checked out</h2>
+    <div class="list" id="loans"></div>
+    <h2>Recent</h2>
+    <div class="list" id="history"></div>
+  </section>
+</div>
+
+<nav class="tabs" role="tablist">
+  <button id="t-shelf" role="tab" aria-selected="true">Station</button>
+  <button id="t-mine" role="tab" aria-selected="false">My items<span class="badge" id="count" hidden>0</span></button>
+</nav>
+
+<div id="sheetRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+const STATIONS=["Winter Garden","Kresge Library","Blau Hall","Robertson Lobby"];
+const ITEMS=[
+  {id:"cube",name:"Fidget cube",shape:"square",note:"Six sides of clicks, switches and rollers."},
+  {id:"ball",name:"Squish ball",shape:"circle",note:"Soft foam that slowly springs back."},
+  {id:"putty",name:"Thinking putty",shape:"oval",note:"Stretch, fold and snap it between meetings."},
+  {id:"ring",name:"Spinner ring",shape:"ring",note:"Quiet enough for a lecture hall."},
+  {id:"tangle",name:"Tangle",shape:"wave",note:"Twistable links you can loop endlessly."},
+  {id:"sand",name:"Kinetic sand tin",shape:"blob",note:"Pocket tin with a tiny rake."},
+];
+const LOAN_MS=24*3600e3, MAX=2;
+const seedStock=()=>Object.fromEntries(STATIONS.map((s,i)=>[s,Object.fromEntries(ITEMS.map((it,j)=>[it.id,(i+j)%4===3?0:1+((i*3+j)%3)]))]));
+let S={station:STATIONS[0],stock:seedStock(),loans:[],history:[]};
+try{const raw=localStorage.getItem("rossRelief");if(raw)S=Object.assign(S,JSON.parse(raw))}catch(e){}
+const save=()=>{try{localStorage.setItem("rossRelief",JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const item=id=>ITEMS.find(i=>i.id===id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function shapeEl(k){
+  if(k==="wave")return `<svg class="shape wave" viewBox="0 0 52 24" aria-hidden="true"><path d="M3 12c6-10 10-10 16 0s10 10 16 0 10-10 14-2" fill="none" stroke="var(--coral)" stroke-width="4" stroke-linecap="round"/></svg>`;
+  return `<span class="shape ${k}" aria-hidden="true"></span>`;
+}
+function fmtDue(t){
+  const d=t-Date.now(), h=Math.floor(Math.abs(d)/3600e3), m=Math.floor(Math.abs(d)%3600e3/60e3);
+  return d<0?`Overdue by ${h}h ${m}m`:`Due in ${h}h ${m}m`;
+}
+function fmtWhen(t){return new Date(t).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})}
+
+function render(){
+  $("station").innerHTML=STATIONS.map(s=>`<option ${s===S.station?"selected":""}>${s}</option>`).join("");
+  const st=S.stock[S.station], total=Object.values(st).reduce((a,b)=>a+b,0);
+  $("status").innerHTML=`<span class="chip"><b>${total}</b> items here</span><span class="chip"><b>${S.loans.length}/${MAX}</b> borrowed</span><span class="chip">Tap MCard or scan</span>`;
+  const full=S.loans.length>=MAX;
+  $("shelf").innerHTML=ITEMS.map(it=>{const n=st[it.id]||0;return `<button class="item" data-id="${it.id}" ${n===0?"disabled":""}>${shapeEl(it.shape)}<span class="name">${it.name}</span><span class="avail">${n===0?"Out right now":n+" available"}</span></button>`}).join("");
+  $("shelf").querySelectorAll(".item").forEach(b=>b.onclick=()=>full?toast("You have 2 items out. Return one first."):openCheckout(b.dataset.id));
+  $("count").hidden=!S.loans.length; $("count").textContent=S.loans.length;
+  $("loans").innerHTML=S.loans.length?S.loans.map((l,i)=>{const it=item(l.item),late=l.due<Date.now();return `<div class="loan">${shapeEl(it.shape)}<div class="meta"><div style="color:var(--ink);font-weight:700">${it.name}</div>From ${esc(l.from)}<div class="due ${late?"late":""}">${fmtDue(l.due)}</div></div><button class="btn ghost" data-i="${i}">Return</button></div>`}).join(""):`<div class="empty">Nothing checked out. Pick something from the station shelf.</div>`;
+  $("loans").querySelectorAll("button").forEach(b=>b.onclick=()=>openReturn(+b.dataset.i));
+  $("history").innerHTML=S.history.length?S.history.slice(0,5).map(h=>`<div class="loan">${shapeEl(item(h.item).shape)}<div class="meta"><div style="color:var(--ink);font-weight:700">${item(h.item).name}</div>Returned to ${esc(h.to)} · ${fmtWhen(h.at)}</div><span></span></div>`).join(""):`<div class="empty">Returned items show up here.</div>`;
+}
+
+function sheet(html){$("sheetRoot").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;$("scrim").onclick=e=>{if(e.target.id==="scrim")close()};const f=$("sheetRoot").querySelector("button");f&&f.focus()}
+function close(){$("sheetRoot").innerHTML=""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
+
+function openCheckout(id){
+  const it=item(id);
+  sheet(`<div class="row">${shapeEl(it.shape)}<div><h3>${it.name}</h3><div class="fine">${esc(S.station)} station</div></div></div>
+  <p style="margin:0">${it.note}</p>
+  <p class="fine" style="margin:0">Due back ${fmtWhen(Date.now()+LOAN_MS)}. Return to any station.</p>
+  <button class="btn primary" id="go">Check out</button>
+  <button class="btn ghost" id="cancel">Cancel</button>`);
+  $("cancel").onclick=close;
+  $("go").onclick=()=>{
+    S.stock[S.station][id]--; S.loans.push({item:id,from:S.station,at:Date.now(),due:Date.now()+LOAN_MS}); save(); render();
+    sheet(`<div class="check" aria-hidden="true">✓</div><h3>Door's open</h3><p style="margin:0">Pick up your ${it.name.toLowerCase()} from the slot at the bottom of the ${esc(S.station)} station.</p><button class="btn primary" id="done">Done</button>`);
+    $("done").onclick=close;
+  };
+}
+function openReturn(i){
+  const l=S.loans[i], it=item(l.item); let to=S.station;
+  const draw=()=>sheet(`<h3>Return ${it.name.toLowerCase()}</h3><p class="fine" style="margin:0">Which station are you at?</p>
+    <div class="pickrow">${STATIONS.map(s=>`<button class="opt" aria-pressed="${s===to}" data-s="${s}">${s}</button>`).join("")}</div>
+    <button class="btn primary" id="ret">Confirm return</button><button class="btn ghost" id="cancel">Cancel</button>`);
+  const wire=()=>{$("sheetRoot").querySelectorAll(".opt").forEach(b=>b.onclick=()=>{to=b.dataset.s;draw();wire()});$("cancel").onclick=close;
+    $("ret").onclick=()=>{S.loans.splice(i,1);S.stock[to][l.item]=(S.stock[to][l.item]||0)+1;S.history.unshift({item:l.item,to,at:Date.now()});save();render();close();toast(`Returned to ${to}. Thanks!`)}};
+  draw();wire();
+}
+let tt;function toast(m){$("toastRoot").innerHTML=`<div class="toast" role="status">${esc(m)}</div>`;clearTimeout(tt);tt=setTimeout(()=>$("toastRoot").innerHTML="",2600)}
+
+function tab(t){$("v-shelf").hidden=t!=="shelf";$("v-mine").hidden=t!=="mine";$("t-shelf").setAttribute("aria-selected",t==="shelf");$("t-mine").setAttribute("aria-selected",t==="mine");window.scrollTo(0,0)}
+$("t-shelf").onclick=()=>tab("shelf");$("t-mine").onclick=()=>tab("mine");
+$("station").onchange=e=>{S.station=e.target.value;save();render()};
+render();setInterval(render,60000);
+</script>
+
+</body></html>
